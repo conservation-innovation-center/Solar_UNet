@@ -79,16 +79,16 @@ def run(dates, aoi:gpd.GeoSeries, name:str, imgsz:int, buff:int, nclasses:int, n
     s2Img = pc_tools.get_s2_stac(aoi.geometry.iloc[0], dates) # xarray dataarray
         
     s2HWC = s2Img.transpose('y', 'x', 'band')
-    s2Transform = naipHWC.rio.transform(recalc = True)
-    s2Res = naipTransform[0]
-    s2CRS = naipHWC.rio.crs
-    s2EPSG = naipCRS.to_epsg()
+    s2Transform = s2HWC.rio.transform(recalc = True)
+    s2Res = s2Transform[0]
+    s2CRS = s2HWC.rio.crs
+    s2EPSG = s2CRS.to_epsg()
 
     print('Sentinel-2 epsg', s2EPSG)
     print('Sentinel-2 res', s2Res)
     print('Sentinel-2 shape', s2HWC.shape)
 
-    aoi_reproj = aoi.to_crs(naipCRS)
+    aoi_reproj = aoi.to_crs(s2CRS)
     bounds = aoi_reproj.total_bounds
     print('aoi bounds', bounds)
 
@@ -153,7 +153,7 @@ def run(dates, aoi:gpd.GeoSeries, name:str, imgsz:int, buff:int, nclasses:int, n
         Y, X = row['S2_coords']
         try:
             s2Chip = s2HWC[Y - buff:Y+imgsz+buff, X - buff:X + imgsz + buff, :].values
-            assert s2Chip.shape == (side, side, 4), f'naip chip not expected shape ({naipChip.shape})'
+            assert s2Chip.shape == (side, side, 4), f'S2 chip not expected shape ({s2Chip.shape})'
             # get model predictions for current chip
             preds = m.predict(np.array([s2Chip]), verbose = 0) # return the probability of solar
             # trim the buffer from prediction trip
