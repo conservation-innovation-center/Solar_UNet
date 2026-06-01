@@ -4,6 +4,7 @@ import os
 from os.path import join
 import sys
 from io import BytesIO
+from dotenv import load_dotenv, dotenv_values
 import multiprocessing
 # from datetime import datetime
 from pathlib import Path
@@ -76,9 +77,14 @@ def run(dates, aoi:gpd.GeoSeries, name:str, imgsz:int, buff:int, nclasses:int, n
     epoch_id = Path(weights).stem[-3:]
 
     # retrieve Sentinel-2 imagery from MPC 
-    s2Img = pc_tools.get_s2_stac(aoi.geometry.iloc[0], dates) # xarray dataarray
-        
-    s2HWC = s2Img.transpose('y', 'x', 'band')
+    s2Img = pc_tools.get_s2_stac(
+        dates = dates,
+        aoi = aoi.geometry.iloc[0],
+        cloud_thresh = 10,
+        bands = ["B02", "B03", "B04", "B08", "B11", "B12"],
+        epsg = None) # xarray dataarray
+    median = s2Img.median(dim="time").rio.write_crs(s2Img.attrs['crs'])#.rio.clip([geom.iloc[0]], crs = 4326)
+    s2HWC = median.transpose('y', 'x', 'band')
     s2Transform = s2HWC.rio.transform(recalc = True)
     s2Res = s2Transform[0]
     s2CRS = s2HWC.rio.crs
@@ -123,7 +129,7 @@ def run(dates, aoi:gpd.GeoSeries, name:str, imgsz:int, buff:int, nclasses:int, n
         "size": imgsz,
         "transform": trimmed_transform
     })
-    mixer_client = container_client.get_blob_client(f'data/predict/{name}/mixer.json')
+    mixer_client = container_client.get_blob_client(f'{data_dir}}/mixer.json')
 
     with BytesIO() as buffer:
         # json.dump(mixer, buffer).encode()
@@ -270,9 +276,10 @@ if __name__ == '__main__':
     nchannels = sum([unet_vars[var]['nchannels'] for var in unet_vars.keys() if unet_vars[var]['files'] is not None])
     weights = run_config["weights"]
     epoch_id = Path(weights).stem[-3:]
+    data_dir = run_config['data_dir']
 
     # get a list of our existing unique ids for which we have already made predictions
-    existing = get_existing_blobs(container_client, f'data/predict/{name}/unet{epoch_id}/tiff/')   
+    existing = get_existing_blobs(container_client, f'{data_dir}/unet{epoch_id}/tiff/')   
     # existing = get_existing_files(f'{local_dir}/unet{epoch_id}/tiff/')
     print(f'already completed {len(existing)} chips')
     run(
