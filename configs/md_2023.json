@@ -1,0 +1,36 @@
+{
+    "imgsz": 256,
+    "buff": 128,
+    "weights": "https://aiprojects.blob.core.windows.net/solar/models/solar_Jun21/best_weights_01Jul21[1].hdf5",
+    "nclasses": 2,
+    "classes":{
+        "emergent":{
+            "names": ["Other", "Emergent", "Water"],
+            "viz": {"R":3, "G":1, "B":2, "A":0}
+        },
+        "full":{
+            "names":["Other", "Emergent", "Forest", "Farm", "Water"],
+            "viz": {"R":1, "G":2, "B":4, "A":0}
+        }
+    },
+    "unet_vars":{
+        "s2":{
+           "nchannels":6,
+           "files":[],
+           "index":0,
+           "mask":false,
+           "rescale_val":{
+            "min":0.0,
+            "max":10000.0
+           },
+           "augment_img":false,
+           "nodata":0.0
+        }
+    },
+    "dates":"2023-05-01/2023-09-30",
+    "aoi":"https://aiprojects.blob.core.windows.net/solar/CPK_solar/boundaries/MD/MD.geojson",
+    "name":"MD_2023",
+    "mixer":"https://aiprojects.blob.core.windows.net/wetlands/data/predict/BGE_Howard/y2021/mixer.json",
+    "data_dir_local":"//chesconse-fs/K/GIS/CBT_NonTidalWetlands/Analysis/Intersection_over_Union/BGE_Howard/y2021",
+    "data_dir":"data/predict/Maryland/2023"
+}
