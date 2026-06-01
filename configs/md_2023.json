@@ -7,10 +7,6 @@
         "emergent":{
             "names": ["Other", "Emergent", "Water"],
             "viz": {"R":3, "G":1, "B":2, "A":0}
-        },
-        "full":{
-            "names":["Other", "Emergent", "Forest", "Farm", "Water"],
-            "viz": {"R":1, "G":2, "B":4, "A":0}
         }
     },
     "unet_vars":{
