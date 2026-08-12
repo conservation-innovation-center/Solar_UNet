@@ -8,6 +8,13 @@
 
 # Data directories
 data/
+.tiff
+.h5
+.keras
+.hdf5
+.vrt
+.tif
+.cog
 
 # C extensions
 *.so
